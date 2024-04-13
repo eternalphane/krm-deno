@@ -1,0 +1,5 @@
+.vscode
+bak
+*.bak
+.env
+dist

@@ -1,0 +1,6 @@
+*
+!src
+!src/*
+!deno.jsonc
+!deno.lock
+!main.ts
