@@ -11,6 +11,22 @@ export class Sandbox<T extends Record<string, any> = Record<string, never>> {
     }
 
     eval(script: string) {
-        return new Function('ctx', `with (ctx) { return (() => { ${script} })(); }`).call(this.#ctx, this.#ctx);
+        return new Function(
+            'ctx',
+            `
+Reflect.defineProperty(Function.prototype, 'constructor', {
+    value: undefined,
+    configurable: false,
+    writable: false,
+    enumerable: false,
+});
+with (ctx) {
+    'use strict';
+    return (() => {
+        'use strict';
+        ${script}
+    })();
+}`,
+        ).call(this.#ctx, this.#ctx);
     }
 }
