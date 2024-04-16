@@ -6,9 +6,9 @@ import type { TypeCheck, ValueErrorIterator } from '@sinclair/typebox/compiler';
 import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { Value } from '@sinclair/typebox/value';
 
-import { Sandbox } from './sandbox.ts';
 import { API_VERSION, KIND, ResourceList } from './schema/resource_list.ts';
 import { Result } from './schema/result.ts';
+import { ScriptWorker } from './script_worker.ts';
 
 class ValidationError extends Error {
     cause: Result[];
@@ -45,21 +45,22 @@ function validate<T extends TSchema>(data: unknown, validator: TypeCheck<T>) {
     throw new ValidationError(validator.Errors(data));
 }
 
-export function process(input: unknown) {
+export async function process(input: unknown) {
     const output = Value.Create(ResourceList.Output);
     try {
         const { functionConfig, items } = validate(input, validator.input);
         let source: string;
-        let params: {};
+        let data: {};
         switch (functionConfig.kind) {
             case 'ConfigMap':
-                ({ source, ...params } = functionConfig.data);
-                params = Object.fromEntries(
-                    Object.entries(params as Record<string, string>).map(([key, value]) => [key, YAML.parse(value)]),
+                ({ source, ...data } = functionConfig.data);
+                data = Object.fromEntries(
+                    Object.entries(data as Record<string, string>).map(([key, value]) => [key, YAML.parse(value)]),
                 );
                 break;
         }
-        output.items = new Sandbox({ items, params }).eval(source);
+        const { params, permissions } = data as Record<string, any>;
+        output.items = await new ScriptWorker({ context: { items, params }, script: source, permissions }).run();
         return validate(output, validator.output);
     } catch (err: unknown) {
         if (err instanceof ValidationError) {

@@ -10,7 +10,7 @@ export class Sandbox<T extends Record<string, any> = Record<string, never>> {
         });
     }
 
-    eval(script: string) {
+    eval(script: string): Promise<any> {
         return new Function(
             'ctx',
             `
@@ -22,7 +22,7 @@ Reflect.defineProperty(Function.prototype, 'constructor', {
 });
 with (ctx) {
     'use strict';
-    return (() => {
+    return (async () => {
         'use strict';
         ${script}
     })();

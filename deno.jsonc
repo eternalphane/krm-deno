@@ -5,11 +5,6 @@
         "@std/yaml": "jsr:@std/yaml@^0.221.0",
         "@sinclair/typebox": "npm:@sinclair/typebox@0.32.20"
     },
-    "compilerOptions": {
-        "lib": [
-            "deno.window"
-        ]
-    },
     "fmt": {
         "lineWidth": 120,
         "indentWidth": 4,
@@ -24,5 +19,6 @@
         "lock": "deno cache --lock=deno.lock --lock-write main.ts",
         "cache": "deno cache --lock=deno.lock main.ts",
         "build": "deno compile --lock=deno.lock -o dist/app main.ts"
-    }
+    },
+    "unstable": ["worker-options"]
 }
