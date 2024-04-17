@@ -17,7 +17,7 @@ export class ScriptWorker<T extends Record<string, any> = Record<string, never>>
         ({ context: this.#ctx, script: this.#script } = opt);
         const workerScript = `
 ${Sandbox}
-self.addEventListener('message', async (ev: MessageEvent) => {
+self.addEventListener('message', async (ev) => {
     const { ctx, script } = ev.data;
     self.postMessage(await new Sandbox(ctx).eval(script));
     self.close();
