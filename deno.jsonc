@@ -1,6 +1,7 @@
 {
     "imports": {
         "@std/collections": "jsr:@std/collections@^0.221.0",
+        "@std/encoding": "jsr:@std/encoding@^0.221.0",
         "@std/streams": "jsr:@std/streams@^0.221.0",
         "@std/yaml": "jsr:@std/yaml@^0.221.0",
         "@sinclair/typebox": "npm:@sinclair/typebox@0.32.20"

@@ -1,3 +1,5 @@
+import { encodeBase64 } from '@std/encoding/base64';
+
 import { Sandbox } from './sandbox.ts';
 
 type ScriptWorkerOptions<T extends Record<string, any>> = {
@@ -13,17 +15,15 @@ export class ScriptWorker<T extends Record<string, any> = Record<string, never>>
 
     constructor(opt: ScriptWorkerOptions<T>) {
         ({ context: this.#ctx, script: this.#script } = opt);
-        const blob = new Blob([`
+        const workerScript = `
 ${Sandbox}
 self.addEventListener('message', async (ev: MessageEvent) => {
     const { ctx, script } = ev.data;
     self.postMessage(await new Sandbox(ctx).eval(script));
     self.close();
 });
-        `], {
-            type: 'application/typescript'
-        });
-        this.#worker = new Worker(URL.createObjectURL(blob), {
+        `.trim();
+        this.#worker = new Worker(`data:application/javascript;base64,${encodeBase64(workerScript)}`, {
             type: 'module',
             deno: {
                 permissions: opt.permissions ?? 'none',
