@@ -46,7 +46,7 @@ self.addEventListener('message', async (ev) => {
             this.#worker.postMessage({
                 ctx: { $: this.#ctx },
                 script: this.#script,
-                globals,
+                globals: this.#globals,
             });
         });
     }
