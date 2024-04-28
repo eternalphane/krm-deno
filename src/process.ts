@@ -59,8 +59,8 @@ export async function process(input: unknown) {
                 );
                 break;
         }
-        const { params, permissions } = data as Record<string, any>;
-        output.items = await new ScriptWorker({ context: { items, params }, script: source, permissions }).run();
+        const { params, permissions, globals } = data as Record<string, any>;
+        output.items = await new ScriptWorker({ context: { items, params }, script: source, permissions, globals }).run();
         return validate(output, validator.output);
     } catch (err: unknown) {
         if (err instanceof ValidationError) {

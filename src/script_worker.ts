@@ -6,19 +6,26 @@ type ScriptWorkerOptions<T extends Record<string, any>> = {
     context: T;
     script: string;
     permissions?: Deno.PermissionOptions;
+    globals?: string[];
 };
 
 export class ScriptWorker<T extends Record<string, any> = Record<string, never>> {
     #ctx;
     #script;
     #worker;
+    #globals;
 
     constructor(opt: ScriptWorkerOptions<T>) {
-        ({ context: this.#ctx, script: this.#script } = opt);
+        ({ context: this.#ctx, script: this.#script, globals: this.#globals } = opt);
         const workerScript = `
 ${Sandbox}
 self.addEventListener('message', async (ev) => {
-    const { ctx, script } = ev.data;
+    const { ctx, script, globals } = ev.data;
+    for (const global of globals) {
+        if (global !== '$') {
+            Object.defineProperty(ctx, global, Object.getOwnPropertyDescriptor(globalThis, global));
+        }
+    }
     self.postMessage(await new Sandbox(ctx).eval(script));
     self.close();
 });
@@ -39,6 +46,7 @@ self.addEventListener('message', async (ev) => {
             this.#worker.postMessage({
                 ctx: { $: this.#ctx },
                 script: this.#script,
+                globals,
             });
         });
     }
